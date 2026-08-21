@@ -1,7 +1,6 @@
 'use client';
 
-import * as React from 'react';
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {
   BazaarioVisual,

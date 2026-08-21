@@ -6,7 +6,6 @@ import { projectsData } from '@/data/projects';
 import { ArrowUpRight, ArrowRight } from 'lucide-react';
 import { SectionReveal } from '@/components/animations/SectionReveal';
 import { MagneticButton } from '@/components/ui/MagneticButton';
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { prefersReducedMotion, isTouchDevice } from '@/lib/animations';
 
 // Dynamic lazy import of 3D Canvas with ssr: false for optimal performance
@@ -19,11 +18,9 @@ export const ProjectsSection: React.FC = () => {
   const [activeProjectId, setActiveProjectId] = useState<string>(projectsData[0].id);
   const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
   const [isMobileOrReduced, setIsMobileOrReduced] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
 
   // Check device capabilities on mount
   useEffect(() => {
-    setHasMounted(true);
     if (isTouchDevice() || prefersReducedMotion() || window.innerWidth < 768) {
       setIsMobileOrReduced(true);
     }
@@ -56,17 +53,6 @@ export const ProjectsSection: React.FC = () => {
 
   const activeIndex = projectsData.findIndex((p) => p.id === activeProjectId);
   const activeProject = projectsData[activeIndex] || projectsData[0];
-
-  const fallback2D = (
-    <div className="my-auto py-12 text-center space-y-4">
-      <div className="w-20 h-20 mx-auto rounded-2xl border border-accent/40 bg-accent/10 flex items-center justify-center text-accent font-display text-2xl font-bold">
-        0{activeIndex + 1}
-      </div>
-      <p className="font-mono text-xs text-muted uppercase tracking-wider">
-        {activeProject.title}
-      </p>
-    </div>
-  );
 
   return (
     <section id="projects" className="py-32 px-6 sm:px-8 lg:px-12 border-t border-white/5 relative bg-spotlight">
@@ -114,17 +100,23 @@ export const ProjectsSection: React.FC = () => {
                 </div>
 
                 {/* 3D Scene Viewport or 2D Glass Fallback */}
-                {hasMounted && !isMobileOrReduced ? (
-                  <ErrorBoundary fallback={fallback2D}>
-                    <div className="w-full h-full relative my-auto">
-                      <Project3DCanvas
-                        activeProjectId={activeProjectId}
-                        isHovered={hoveredProjectId === activeProjectId}
-                      />
-                    </div>
-                  </ErrorBoundary>
+                {!isMobileOrReduced ? (
+                  <div className="w-full h-full relative my-auto">
+                    <Project3DCanvas
+                      activeProjectId={activeProjectId}
+                      isHovered={hoveredProjectId === activeProjectId}
+                    />
+                  </div>
                 ) : (
-                  fallback2D
+                  /* Elegant 2D Fallback Representation */
+                  <div className="my-auto py-12 text-center space-y-4">
+                    <div className="w-20 h-20 mx-auto rounded-2xl border border-accent/40 bg-accent/10 flex items-center justify-center text-accent font-display text-2xl font-bold">
+                      0{activeIndex + 1}
+                    </div>
+                    <p className="font-mono text-xs text-muted uppercase tracking-wider">
+                      {activeProject.title}
+                    </p>
+                  </div>
                 )}
 
                 {/* Bottom Viewport Info Bar */}
