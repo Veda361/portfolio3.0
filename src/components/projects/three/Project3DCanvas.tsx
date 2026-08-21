@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {
   BazaarioVisual,
@@ -23,6 +23,16 @@ export const Project3DCanvas: React.FC<Project3DCanvasProps> = ({
   isHovered = false,
   className = '',
 }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // 50ms tick to ensure React internal module scope is fully attached before R3F Canvas initializes
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
+
   const renderVisual = () => {
     switch (activeProjectId) {
       case 'bazaario':
@@ -41,6 +51,10 @@ export const Project3DCanvas: React.FC<Project3DCanvasProps> = ({
         return <BazaarioVisual isHovered={isHovered} />;
     }
   };
+
+  if (!isReady) {
+    return <div className={`relative w-full h-full min-h-[320px] lg:min-h-[420px] ${className}`} aria-hidden="true" />;
+  }
 
   return (
     <div className={`relative w-full h-full min-h-[320px] lg:min-h-[420px] ${className}`} aria-hidden="true">
