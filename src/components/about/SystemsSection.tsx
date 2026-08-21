@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { SectionReveal } from '@/components/animations/SectionReveal';
 import { MagneticButton } from '@/components/ui/MagneticButton';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { prefersReducedMotion, isTouchDevice } from '@/lib/animations';
 import { Cpu, Zap, Globe, Layers } from 'lucide-react';
 
@@ -17,8 +18,10 @@ type StageType = 'ai' | 'software' | 'hardware' | 'convergence';
 export const SystemsSection: React.FC = () => {
   const [activeStage, setActiveStage] = useState<StageType>('ai');
   const [isMobileOrReduced, setIsMobileOrReduced] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    setHasMounted(true);
     if (isTouchDevice() || prefersReducedMotion() || window.innerWidth < 768) {
       setIsMobileOrReduced(true);
     }
@@ -77,6 +80,17 @@ export const SystemsSection: React.FC = () => {
   ];
 
   const currentStageObj = stages.find((s) => s.id === activeStage) || stages[0];
+
+  const fallback2D = (
+    <div className="my-auto py-10 text-center space-y-4">
+      <div className="w-20 h-20 mx-auto rounded-2xl border border-accent/40 bg-accent/10 flex items-center justify-center text-accent font-display text-2xl font-bold">
+        {currentStageObj.number}
+      </div>
+      <p className="font-mono text-xs text-muted uppercase tracking-wider">
+        {currentStageObj.title}
+      </p>
+    </div>
+  );
 
   return (
     <section id="systems" className="py-32 px-6 sm:px-8 lg:px-12 border-t border-white/5 relative bg-spotlight">
@@ -140,19 +154,14 @@ export const SystemsSection: React.FC = () => {
                   <span className="text-foreground">{currentStageObj.tag}</span>
                 </div>
 
-                {!isMobileOrReduced ? (
-                  <div className="w-full h-full relative my-auto">
-                    <System3DCanvas stageId={activeStage} />
-                  </div>
-                ) : (
-                  <div className="my-auto py-10 text-center space-y-4">
-                    <div className="w-20 h-20 mx-auto rounded-2xl border border-accent/40 bg-accent/10 flex items-center justify-center text-accent font-display text-2xl font-bold">
-                      {currentStageObj.number}
+                {hasMounted && !isMobileOrReduced ? (
+                  <ErrorBoundary fallback={fallback2D}>
+                    <div className="w-full h-full relative my-auto">
+                      <System3DCanvas stageId={activeStage} />
                     </div>
-                    <p className="font-mono text-xs text-muted uppercase tracking-wider">
-                      {currentStageObj.title}
-                    </p>
-                  </div>
+                  </ErrorBoundary>
+                ) : (
+                  fallback2D
                 )}
 
                 <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono relative z-10">
