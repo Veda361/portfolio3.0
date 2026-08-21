@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { experienceData } from '@/data/experience';
 import { SectionReveal } from '@/components/animations/SectionReveal';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { Cpu, Globe, Zap, CheckCircle2 } from 'lucide-react';
-import gsap from 'gsap';
 
 export const ExperienceSection: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string>(experienceData[0].id);
-  const timelineRef = useRef<HTMLDivElement>(null);
 
   const getStageMeta = (index: number) => {
     switch (index) {
@@ -39,13 +37,6 @@ export const ExperienceSection: React.FC = () => {
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
-    if (timelineRef.current) {
-      gsap.fromTo(
-        `.experience-card-${id}`,
-        { opacity: 0.8, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
-      );
-    }
   };
 
   return (
@@ -74,7 +65,7 @@ export const ExperienceSection: React.FC = () => {
           </div>
 
           {/* Interactive Timeline Phase Switcher / Filter Pills */}
-          <div className="flex flex-wrap items-center gap-3 mb-12 border-b border-white/10 pb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-12 border-b border-white/10 pb-6" role="tablist" aria-label="Experience Timeline Phases">
             {experienceData.map((item, idx) => {
               const isSelected = selectedId === item.id;
               const meta = getStageMeta(idx);
@@ -83,8 +74,10 @@ export const ExperienceSection: React.FC = () => {
               return (
                 <MagneticButton key={item.id} strength={8}>
                   <button
+                    role="tab"
+                    aria-selected={isSelected}
                     onClick={() => handleSelect(item.id)}
-                    className={`flex items-center space-x-2.5 px-5 py-2.5 rounded-full font-mono text-xs tracking-wider uppercase transition-all duration-300 ${
+                    className={`flex items-center space-x-2.5 px-5 py-2.5 rounded-full font-mono text-xs tracking-wider uppercase transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                       isSelected
                         ? 'bg-foreground text-background font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)]'
                         : 'glass-panel text-muted hover:text-foreground border border-white/10 hover:border-white/30'
@@ -99,7 +92,7 @@ export const ExperienceSection: React.FC = () => {
           </div>
 
           {/* Vertical Interactive Timeline Stack */}
-          <div ref={timelineRef} className="relative space-y-12 pl-6 sm:pl-10 border-l border-white/10">
+          <div className="relative space-y-12 pl-6 sm:pl-10 border-l border-white/10">
             {experienceData.map((item, idx) => {
               const isSelected = selectedId === item.id;
               const meta = getStageMeta(idx);
@@ -109,7 +102,7 @@ export const ExperienceSection: React.FC = () => {
                 <div
                   key={item.id}
                   onClick={() => handleSelect(item.id)}
-                  className={`experience-card-${item.id} relative cursor-pointer group transition-all duration-500`}
+                  className="relative cursor-pointer group transition-all duration-500"
                 >
                   {/* Glowing Node Marker on Left Line */}
                   <div
@@ -169,19 +162,21 @@ export const ExperienceSection: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Technology Stack Pills */}
+                    {/* Technology Stack Pills with direct jump to Skills section */}
                     <div className="flex flex-wrap gap-2 pt-2">
                       {item.technologies.map((tech) => (
-                        <span
+                        <a
                           key={tech}
-                          className={`text-xs font-mono px-3 py-1 rounded-full border transition-colors ${
+                          href="#skills"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`text-xs font-mono px-3 py-1 rounded-full border transition-all duration-300 ${
                             isSelected
-                              ? 'bg-accent/10 border-accent/30 text-accent'
-                              : 'bg-background border-white/5 text-muted'
+                              ? 'bg-accent/10 border-accent/30 text-accent hover:border-accent hover:bg-accent/20'
+                              : 'bg-background border-white/5 text-muted hover:border-white/20 hover:text-foreground'
                           }`}
                         >
                           {tech}
-                        </span>
+                        </a>
                       ))}
                     </div>
 
